@@ -63,7 +63,7 @@ interface Order {
 const StudentDashboard: React.FC = () => {
   const { user, signOut } = useAuth();
   const { theme } = useTheme();
-  const [activeTab, setActiveTab] = useState<'menu' | 'cart' | 'orders' | 'profile'>('menu');
+  const [activeTab, setActiveTab] = useState<'menu' | 'cart' | 'orders'>('menu');
   const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const [orders, setOrders] = useState<Order[]>([]);
@@ -71,6 +71,7 @@ const StudentDashboard: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
+  const [showProfileMenu, setShowProfileMenu] = useState(false);
 
   // Real-time subscriptions for menu items and cart
   useRealtimeSubscription({
@@ -336,27 +337,54 @@ const StudentDashboard: React.FC = () => {
             </div>
             
             <div className="flex items-center space-x-4">
-              <ThemeToggle />
-              
               <button
-                onClick={() => setActiveTab('cart')}
-                className="relative p-2 text-gray-600 dark:text-gray-300 hover:text-orange-500 transition-colors"
+                onClick={() => {}}
+                className="p-3 rounded-xl transition-all duration-300 hover:scale-105 text-gray-700 dark:text-gray-300"
+                title="Toggle Theme"
               >
-                <ShoppingCart className="w-6 h-6" />
-                {cartItems.length > 0 && (
-                  <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
-                    {cartItems.reduce((sum, item) => sum + item.quantity, 0)}
-                  </span>
+                <ThemeToggle />
+              </button>
+              
+              {/* Profile Menu */}
+              <div className="relative">
+                <button
+                  onClick={() => setShowProfileMenu(!showProfileMenu)}
+                  className="p-2 text-gray-600 dark:text-gray-300 hover:text-orange-500 transition-colors"
+                >
+                  <User className="w-6 h-6" />
+                </button>
+                
+                {showProfileMenu && (
+                  <div className="absolute right-0 mt-2 w-64 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 z-50">
+                    <div className="p-4 border-b border-gray-200 dark:border-gray-700">
+                      <div className="flex items-center space-x-3">
+                        <div className="w-10 h-10 bg-gradient-to-r from-orange-500 to-red-500 rounded-full flex items-center justify-center">
+                          <User className="w-5 h-5 text-white" />
+                        </div>
+                        <div>
+                          <h3 className="font-semibold text-gray-900 dark:text-white">{user?.full_name || 'Student'}</h3>
+                          <p className="text-sm text-gray-600 dark:text-gray-300">{user?.email}</p>
+                          {user?.registration_number && (
+                            <p className="text-xs text-gray-500 dark:text-gray-400">Reg: {user.registration_number}</p>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                    <div className="p-2">
+                      <button
+                        onClick={() => {
+                          signOut();
+                          setShowProfileMenu(false);
+                        }}
+                        className="w-full flex items-center space-x-2 px-3 py-2 text-left text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+                      >
+                        <LogOut className="w-4 h-4" />
+                        <span>Sign Out</span>
+                      </button>
+                    </div>
+                  </div>
                 )}
-              </button>
-              
-              <button
-                onClick={signOut}
-                className="flex items-center space-x-2 text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors"
-              >
-                <LogOut className="w-5 h-5" />
-                <span>Sign Out</span>
-              </button>
+              </div>
             </div>
           </div>
         </div>
@@ -369,8 +397,7 @@ const StudentDashboard: React.FC = () => {
             {[
               { id: 'menu', label: 'Menu', icon: Search },
               { id: 'cart', label: 'Cart', icon: ShoppingCart },
-              { id: 'orders', label: 'Orders', icon: Package },
-              { id: 'profile', label: 'Profile', icon: User }
+              { id: 'orders', label: 'Orders', icon: Package }
             ].map(({ id, label, icon: Icon }) => (
               <button
                 key={id}
@@ -658,97 +685,6 @@ const StudentDashboard: React.FC = () => {
             )}
           </div>
         )}
-
-        {/* Profile Tab */}
-        {activeTab === 'profile' && (
-          <div className="space-y-6">
-            <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Profile</h2>
-            
-            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
-              <div className="flex items-center space-x-4 mb-6">
-                <div className="w-16 h-16 bg-gradient-to-r from-orange-500 to-red-500 rounded-full flex items-center justify-center">
-                  <User className="w-8 h-8 text-white" />
-                </div>
-                <div>
-                  <h3 className="text-xl font-semibold text-gray-900 dark:text-white">{user?.full_name || 'Student'}</h3>
-                  <p className="text-gray-600 dark:text-gray-300">{user?.email}</p>
-                  {user?.registration_number && (
-                    <p className="text-sm text-gray-500 dark:text-gray-400">Reg: {user.registration_number}</p>
-                  )}
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    Full Name
-                  </label>
-                  <input
-                    type="text"
-                    value={user?.full_name || ''}
-                    readOnly
-                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    Email
-                  </label>
-                  <input
-                    type="email"
-                    value={user?.email || ''}
-                    readOnly
-                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    Role
-                  </label>
-                  <input
-                    type="text"
-                    value="Student"
-                    readOnly
-                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    Registration Number
-                  </label>
-                  <input
-                    type="text"
-                    value={user?.registration_number || 'Not provided'}
-                    readOnly
-                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    Mobile Number
-                  </label>
-                  <input
-                    type="text"
-                    value={user?.mobile_number || 'Not provided'}
-                    readOnly
-                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    Account Created
-                  </label>
-                  <input
-                    type="text"
-                    value={user?.created_at ? new Date(user.created_at).toLocaleDateString() : 'Not available'}
-                    readOnly
-                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white"
-                  />
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
       </main>
 
       {/* Toast */}
@@ -757,6 +693,14 @@ const StudentDashboard: React.FC = () => {
           message={toast.message}
           type={toast.type}
           onClose={() => setToast(null)}
+        />
+      )}
+
+      {/* Click outside to close profile menu */}
+      {showProfileMenu && (
+        <div 
+          className="fixed inset-0 z-40" 
+          onClick={() => setShowProfileMenu(false)}
         />
       )}
     </div>
