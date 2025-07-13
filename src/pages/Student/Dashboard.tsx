@@ -337,19 +337,56 @@ const StudentDashboard: React.FC = () => {
             </div>
             
             <div className="flex items-center space-x-4">
-              <button
-                onClick={() => {}}
-                className="p-3 rounded-xl transition-all duration-300 hover:scale-105 text-gray-700 dark:text-gray-300"
-                title="Toggle Theme"
-              >
+              <div className="p-3 rounded-xl transition-all duration-300 hover:scale-105 text-gray-700 dark:text-gray-300">
                 <ThemeToggle />
-              </button>
+              </div>
               
-              {/* Profile Menu */}
-              <div className="relative">
+              {/* Mobile Profile Menu - visible only on small screens */}
+              <div className="relative md:hidden">
                 <button
                   onClick={() => setShowProfileMenu(!showProfileMenu)}
                   className="p-2 text-gray-600 dark:text-gray-300 hover:text-orange-500 transition-colors"
+                >
+                  <User className="w-6 h-6" />
+                </button>
+                
+                {showProfileMenu && (
+                  <div className="absolute right-0 mt-2 w-64 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 z-50">
+                    <div className="p-4 border-b border-gray-200 dark:border-gray-700">
+                      <div className="flex items-center space-x-3">
+                        <div className="w-10 h-10 bg-gradient-to-r from-orange-500 to-red-500 rounded-full flex items-center justify-center">
+                          <User className="w-5 h-5 text-white" />
+                        </div>
+                        <div>
+                          <h3 className="font-semibold text-gray-900 dark:text-white">{user?.full_name || 'Student'}</h3>
+                          <p className="text-sm text-gray-600 dark:text-gray-300">{user?.email}</p>
+                          {user?.registration_number && (
+                            <p className="text-xs text-gray-500 dark:text-gray-400">Reg: {user.registration_number}</p>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                    <div className="p-2">
+                      <button
+                        onClick={() => {
+                          signOut();
+                          setShowProfileMenu(false);
+                        }}
+                        className="w-full flex items-center space-x-2 px-3 py-2 text-left text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+                      >
+                        <LogOut className="w-4 h-4" />
+                        <span>Sign Out</span>
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+              
+              {/* Desktop Profile Menu - visible only on medium screens and up */}
+              <div className="relative">
+                <button
+                  onClick={() => setShowProfileMenu(!showProfileMenu)}
+                  className="hidden md:block p-2 text-gray-600 dark:text-gray-300 hover:text-orange-500 transition-colors"
                 >
                   <User className="w-6 h-6" />
                 </button>
